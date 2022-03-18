@@ -12,9 +12,13 @@ import com.example.homelauncher.databinding.RowItemInstallAppLayoutBinding
 import com.example.homelauncher.model.InstalledAppInfo
 
 
-class InstalledAppInfoAdapter (val context: Context?, private val installedAppList: ArrayList<InstalledAppInfo> ): RecyclerView.Adapter<InstalledAppInfoAdapter.BaseViewHolder<*>>(){
+class InstalledAppInfoAdapter (val context: Context?): RecyclerView.Adapter<InstalledAppInfoAdapter.BaseViewHolder<*>>(){
 
-
+    private var installedAppList: ArrayList<InstalledAppInfo> = arrayListOf()
+    fun setInstallAppList( installedAppList: ArrayList<InstalledAppInfo> ){
+        this.installedAppList = installedAppList
+        notifyDataSetChanged()
+    }
     abstract class BaseViewHolder<T>(itemView: View) : RecyclerView.ViewHolder(itemView) {
         abstract fun bind(item: InstalledAppInfo)
     }
