@@ -1,6 +1,7 @@
 package com.example.homelauncher.ui.main
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,7 +34,21 @@ class InstalledAppInfoAdapter (val context: Context?, private val installedAppLi
     inner class ViewHolderInstalledApp(var binding: RowItemInstallAppLayoutBinding) :
         BaseViewHolder<InstalledAppInfo>(binding.root) {
         override fun bind(item: InstalledAppInfo) {
+            binding.clMainLayout.setOnClickListener {
+                try {
+                    val i = context?.packageManager?.getLaunchIntentForPackage(item.packageName)
+                    context?.startActivity(i)
+                } catch (e: Exception) {
+                   e.printStackTrace()
+                }
 
+            }
+            binding.ivAppIcon.setImageDrawable(item.appIcon)
+            binding.tvAppName.text = item.appName
+            binding.tvPackageName.text = item.packageName
+            binding.tvClassName.text = item.appActivityClassName
+            binding.tvVersionName.text = item.appVersionName
+            binding.tvVersionCode.text = item.appVersionCode
         }
     }
 

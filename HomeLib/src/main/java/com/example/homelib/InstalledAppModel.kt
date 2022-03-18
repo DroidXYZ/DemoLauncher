@@ -6,7 +6,7 @@ data class InstalledAppModel (
     val  appName:String,
     val  packageName:String,
     val  iconURL:Drawable?,
-    val  appActivityClassName:String,
+    val  appActivityClassName:String?,
     val  appVersionCode:String,
     val  appVersionName:String,
     )
