@@ -1,11 +1,17 @@
 package com.example.homelauncher.ui.main
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.example.homelauncher.R
@@ -22,7 +28,23 @@ class MainFragment : Fragment() {
 
     private lateinit var rvAppInfo:RecyclerView
     private lateinit var searchView: SearchView
-    val installedAppList= arrayListOf<InstalledAppInfo>()
+    private val installedAppList= arrayListOf<InstalledAppInfo>()
+    private lateinit var installedAppInfoAdapter:InstalledAppInfoAdapter
+    private val appInstallReceiver:BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            getInstalledAppList()
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED)
+        intentFilter.addAction(Intent.ACTION_PACKAGE_INSTALL)
+        context?.registerReceiver(appInstallReceiver, intentFilter)
+        context?.let { LocalBroadcastManager.getInstance(it).registerReceiver(appInstallReceiver,intentFilter) }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,14 +64,10 @@ class MainFragment : Fragment() {
             1
         )
         rvAppInfo.addItemDecoration(dividerItemDecoration)
-        val infoList= LauncherInfo.getAllInstallAppInfo(context)
-        infoList.forEach {
-            installedAppList.add(InstalledAppInfo(it.appName,it.packageName,it.iconURL,it.appActivityClassName,it.appVersionCode,it.appVersionName))
-        }
-        val installedAppInfoAdapter= InstalledAppInfoAdapter(context)
-        installedAppInfoAdapter.setInstallAppList(installedAppList)
+        installedAppInfoAdapter= InstalledAppInfoAdapter(context)
         rvAppInfo.adapter = installedAppInfoAdapter
-        installedAppInfoAdapter.notifyDataSetChanged()
+        getInstalledAppList()
+
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(searchCriteria: String): Boolean {
                 filterList(searchCriteria,installedAppInfoAdapter)
@@ -68,6 +86,19 @@ class MainFragment : Fragment() {
             pattern.filterSearch(s.appName?:"")
         }
         installedAppInfoAdapter.setInstallAppList(filteredMap.toMutableList() as ArrayList<InstalledAppInfo>)
+    }
+
+    private fun getInstalledAppList(){
+        val infoList= LauncherInfo.getAllInstallAppInfo(context)
+        infoList.forEach {
+            installedAppList.add(InstalledAppInfo(it.appName,it.packageName,it.iconURL,it.appActivityClassName,it.appVersionCode,it.appVersionName))
+        }
+        installedAppInfoAdapter.setInstallAppList(installedAppList)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        context?.let { LocalBroadcastManager.getInstance(it).unregisterReceiver(appInstallReceiver) }
     }
 
 
