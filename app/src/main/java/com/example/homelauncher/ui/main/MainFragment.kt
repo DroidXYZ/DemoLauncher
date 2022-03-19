@@ -33,6 +33,13 @@ class MainFragment : Fragment() {
     private val appInstallReceiver:BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             getInstalledAppList()
+            val duration = Toast.LENGTH_SHORT
+            var action:String ="NO Action"
+            intent?.let {
+                action= it.action.toString()
+            }
+
+            Toast.makeText(context, "We got action is $action", duration).show()
         }
     }
 
@@ -41,9 +48,8 @@ class MainFragment : Fragment() {
 
         val intentFilter = IntentFilter()
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED)
-        intentFilter.addAction(Intent.ACTION_PACKAGE_INSTALL)
         context?.registerReceiver(appInstallReceiver, intentFilter)
-        context?.let { LocalBroadcastManager.getInstance(it).registerReceiver(appInstallReceiver,intentFilter) }
+        context?.let { it.registerReceiver(appInstallReceiver,intentFilter) }
     }
 
     override fun onCreateView(
@@ -98,7 +104,7 @@ class MainFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        context?.let { LocalBroadcastManager.getInstance(it).unregisterReceiver(appInstallReceiver) }
+        context?.let { it.unregisterReceiver(appInstallReceiver) }
     }
 
 
